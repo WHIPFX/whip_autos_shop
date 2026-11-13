@@ -19,7 +19,7 @@ version '1.0.0'
 -- The roller door is GTA's own (Rockstar's style 8 door, in its own small map whiplash_shop_ext, drawn to 160 m): it
 -- opens for anyone on foot or in a car and shuts by itself. So does the paint booth's door (whiplash_spray_door, a GTA
 -- garage door like LS Customs' spray door). Neither is in whip's door system. To lock it, register model whiplash_shop_door at (-349.824, -117.245, 38.103).
--- Interior proxy order slot 5300 (whippy_mirror_park_homes uses 5000-5094).
+-- Interior proxy order slot 5300 (whip_homes_mirrorpark uses 5000-5094).
 
 files {
     'whiplash_shop_interiorproxies.meta',
