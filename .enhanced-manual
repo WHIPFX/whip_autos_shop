@@ -1,0 +1,2 @@
+stream_enhanced/ is hand-made, not converted from stream/.
+The pre-commit hook only reminds you to update it when stream/ changes.
