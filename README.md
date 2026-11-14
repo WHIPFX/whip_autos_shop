@@ -38,6 +38,6 @@ door, save it as a door in the Door System: model `whiplash_shop_door` at `-349.
 
 ## License
 
-whip_autos_shop's code is licensed under the GNU LGPL 3.0; see `LICENSE`. Its map files are made from Grand Theft
-Auto V and are Rockstar Games' material, used under the Cfx.re Creator Platform License Agreement. WHIP's licence
-doesn't cover them; see `whip_core`'s `NOTICE.md`.
+whip_autos_shop's code is licensed under the GNU LGPL 3.0; see `COPYING.LESSER`, and `COPYING` for the GPL 3.0 it
+builds on. Its map files are made from Grand Theft Auto V and belong to Rockstar Games: WHIP's licence doesn't cover
+them. See `NOTICE.md`, and `whip_core`'s `NOTICE.md` for the full notice.
