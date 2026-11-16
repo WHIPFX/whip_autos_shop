@@ -5,7 +5,7 @@ lua54 'yes'   -- client.lua uses & (Lua 5.3+)
 name 'whip_autos_shop'
 description 'The WHIPLASH drive-in shop building in Burton, for whip_autos (Whiplash). Map files, and one small client script.'
 author '3D Clanker, for Whippy'
-version '1.0.0'
+version '1.0.1'
 whip_updates 'WHIPFX/whip_autos_shop'   -- whip_core checks this repository's releases for a newer version
 
 -- Rockstar's Tuners Auto Shop inside the Los Santos Customs building in Burton, entered from the car park through
