@@ -36,6 +36,6 @@ data_file 'INTERIOR_PROXY_ORDER_FILE' 'whiplash_shop_interiorproxies.meta'
 data_file 'TIMECYCLEMOD_FILE' 'data/whiplash_shop_timecycle.xml'
 
 -- Switches off Rockstar's Los Santos Customs interior at Burton on each game (GTA registers it at load whatever its maps
--- say, and its walls stood invisibly in the shop). Only that one: the airport's is left alone. And keeps the shop's
--- roller and paint booth doors awake while a player is within 12 m (GTA's high frame rate door bug; F8 whiplash_doors).
+-- say, and its walls stood invisibly in the shop). Only that one: the airport's is left alone. And hides the roller
+-- door's far stand-in while the real door is there (F8 whiplash_doors).
 client_script 'client.lua'
