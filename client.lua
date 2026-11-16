@@ -25,22 +25,18 @@ CreateThread(function()
     end
 end)
 
--- Door wake-up. GTA's automatic doors (roller, garage, sliding) only wake their physics when a frame takes long
--- enough. At high frame rates a door that has closed falls asleep and stops noticing you, so it opens once and then
--- not again (from inside it looks one-sided). FiveM patched this for Legacy only (citizenfx/fivem pull request 4058,
--- tested on game build 3407); FiveM for Enhanced has no patch. While you're within WAKE_NEAR m of one of the shop's
--- doors, this client wakes that door every frame, which is what the patch does. GTA's own door logic still decides
--- when it opens and closes: nothing is registered in the door system (whip_core owns that), unlocked or forced.
--- F8: whiplash_doors (status), whiplash_doors off / on (switch the wake-up for a side-by-side test).
-local WAKE_NEAR = 12.0                      -- m from the door's closed spot
-local WAKE_DOORS = {
+-- The shop's doors are GTA's own automatic doors: GTA opens and shuts them, and nothing registers them in the door
+-- system (whip_core owns that). (Up to 1.0.0 this file woke them every frame near a player, as GTA's doors fell asleep
+-- at high frame rates. FiveM fixed that on Legacy (citizenfx/fivem#4058), and FiveM for GTAV Enhanced does not do it
+-- either: tested 16 Nov 2026.)
+-- F8: whiplash_doors (where the doors are, and the roller door's far stand-in).
+local DOORS = {
     { name = 'whiplash_shop_door', pos = vector3(-349.824, -117.245, 38.103), search = 6.0 },   -- roller, slides up
     { name = 'whiplash_spray_door', pos = vector3(-338.129, -125.069, 39.177), search = 4.0 },  -- paint booth
 }
-local wakeOn = true
 
 local function u32(h) return h % 4294967296 end          -- hashes come back signed or unsigned
-for _, d in ipairs(WAKE_DOORS) do d.hash = u32(GetHashKey(d.name)) end
+for _, d in ipairs(DOORS) do d.hash = u32(GetHashKey(d.name)) end
 
 local function doorObject(d)                               -- the door's object, while GTA has it created
     if d.obj and DoesEntityExist(d.obj) and u32(GetEntityModel(d.obj)) == d.hash then return d.obj end
@@ -53,31 +49,6 @@ local function doorObject(d)                               -- the door's object,
     return d.obj
 end
 
-CreateThread(function()
-    local near, nextScan = {}, 0
-    while true do
-        local now = GetGameTimer()
-        if now >= nextScan then                            -- which doors are near: 4 times a second
-            nextScan = now + 250
-            near = {}
-            if wakeOn then
-                local p = GetEntityCoords(PlayerPedId())
-                for _, d in ipairs(WAKE_DOORS) do
-                    if #(p - d.pos) < WAKE_NEAR then near[#near + 1] = d end
-                end
-            end
-        end
-        local awake = 0
-        for i = 1, #near do
-            local o = doorObject(near[i])
-            if o then ActivatePhysics(o); awake = awake + 1 end
-        end
-        if #near == 0 then Wait(500); nextScan = 0
-        elseif awake == 0 then Wait(250)                   -- near, but the door isn't created yet
-        else Wait(0) end
-    end
-end)
-
 -- The roller door's far stand-in. The real door hangs on the shop's doorway portal, as Rockstar's garage doors do
 -- (Michael's, LS Customs', Benny's), so it only exists while the interior is loaded (within about 50 m). From further
 -- away a static copy in a world map (whiplash_shop_door_far: same model, no collision) fills the doorway. While the
@@ -87,7 +58,7 @@ local FAR_CHECK = 120.0                     -- m: look for the real door this cl
 local farHidden = false
 
 local function setFarHidden(hide)
-    local d = WAKE_DOORS[1]
+    local d = DOORS[1]
     if hide then
         CreateModelHide(d.pos.x, d.pos.y, d.pos.z, 3.0, FAR_MODEL, true)
     else
@@ -97,7 +68,7 @@ local function setFarHidden(hide)
 end
 
 CreateThread(function()
-    local d = WAKE_DOORS[1]
+    local d = DOORS[1]
     while true do
         local close = #(GetEntityCoords(PlayerPedId()) - d.pos) < FAR_CHECK
         local real = close and doorObject(d) or nil
@@ -111,22 +82,17 @@ AddEventHandler('onResourceStop', function(name)
     if name == GetCurrentResourceName() and farHidden then setFarHidden(false) end
 end)
 
-RegisterCommand('whiplash_doors', function(_, args)
-    if args[1] == 'off' or args[1] == 'on' then
-        wakeOn = args[1] == 'on'
-        print(('[whip_autos_shop] door wake-up %s'):format(wakeOn and 'ON' or 'OFF (GTA alone)'))
-        return
-    end
+RegisterCommand('whiplash_doors', function()
     local ped = PlayerPedId()
     local p = GetEntityCoords(ped)
-    print(('[whip_autos_shop] door wake-up %s; you: interior %d room %d'):format(wakeOn and 'ON' or 'OFF',
+    print(('[whip_autos_shop] the shop\'s doors; you: interior %d room %d'):format(
         GetInteriorFromEntity(ped), GetRoomKeyFromEntity(ped)))
-    for _, d in ipairs(WAKE_DOORS) do
+    for _, d in ipairs(DOORS) do
         d.retryAt = nil
         local o = doorObject(d)
         if o then
-            print(('  %s: object %d, you %.1f m away, moved %.2f m from shut%s'):format(d.name, o, #(p - d.pos),
-                #(GetEntityCoords(o) - d.pos), #(p - d.pos) < WAKE_NEAR and wakeOn and ', kept awake' or ''))
+            print(('  %s: object %d, you %.1f m away, moved %.2f m from shut'):format(d.name, o, #(p - d.pos),
+                #(GetEntityCoords(o) - d.pos)))
         else
             print(('  %s: no object (you %.1f m away)'):format(d.name, #(p - d.pos)))
         end
